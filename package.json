@@ -2,5 +2,8 @@
   "name": "xindong-xiaoguan",
   "version": "1.0.0",
   "description": "心动小馆 - 情侣虚拟互动点餐系统",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^8.0.0"
+  }
 }

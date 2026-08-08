@@ -1,6 +1,7 @@
 [build]
   publish = "."
   functions = "netlify/functions"
+  command = "npm install"
 
 # API 路由转发到 Netlify Function
 [[redirects]]
