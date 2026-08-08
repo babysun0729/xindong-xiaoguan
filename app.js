@@ -1532,7 +1532,7 @@ function showCustomItemModal() {
 function showAnniversaryModal() {
   openGenericModal('🎂 纪念日管理', `
     <p style="font-size:13px;color:var(--text-sub);margin-bottom:14px;">管理你们的纪念日，首页会显示倒计时~</p>
-    ${state.anniversaries.map(an => `<div class="modal-list-item"><div class="modal-list-emoji">${an.emoji}</div><div class="modal-list-body"><div class="modal-list-name">${an.name}</div><div class="modal-list-desc">${an.month}月${an.day}日</div></div><button class="modal-list-action action-remove" data-an-id="${an.id}">删除</button></div>`).join('')}
+    <div id="an-list">${state.anniversaries.map(an => renderAnItem(an)).join('')}</div>
     <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--bg-warm);">
       <div class="form-group"><label class="form-label">添加纪念日</label>
         <div style="display:flex;gap:8px;margin-bottom:8px;"><input class="form-input" id="an-emoji" placeholder="🎂" style="width:60px;flex-shrink:0;text-align:center;" maxlength="2"><input class="form-input" id="an-name" placeholder="纪念日名称" style="flex:1;"></div>
@@ -1548,8 +1548,72 @@ function showAnniversaryModal() {
     state.anniversaries.push({ id: 'an' + Date.now(), name, emoji, month, day });
     saveState(); toast('纪念日已添加！', 'success'); showAnniversaryModal();
   };
-  $$('.modal-list-action[data-an-id]').forEach(btn => {
-    btn.onclick = () => { state.anniversaries = state.anniversaries.filter(a => a.id !== btn.dataset.anId); saveState(); toast('已删除'); showAnniversaryModal(); };
+  bindAnEvents();
+}
+
+function renderAnItem(an) {
+  return `<div class="modal-list-item an-item" data-an-id="${an.id}">
+    <div class="modal-list-emoji">${an.emoji}</div>
+    <div class="modal-list-body">
+      <div class="modal-list-name">${an.name}</div>
+      <div class="modal-list-desc">${an.month}月${an.day}日</div>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button class="modal-list-action action-edit" data-edit-id="${an.id}" style="background:var(--bg-warm);color:var(--text-main);">修改</button>
+      <button class="modal-list-action action-remove" data-del-id="${an.id}">删除</button>
+    </div>
+  </div>
+  <div class="an-edit-form" id="edit-form-${an.id}" style="display:none;padding:12px;background:var(--bg-warm);border-radius:10px;margin-bottom:8px;">
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <input class="form-input" id="edit-emoji-${an.id}" value="${an.emoji}" style="width:50px;flex-shrink:0;text-align:center;" maxlength="2">
+      <input class="form-input" id="edit-name-${an.id}" value="${an.name}" style="flex:1;" placeholder="名称">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select class="form-select" id="edit-month-${an.id}" style="flex:1;">${Array.from({length:12},(_,i)=>`<option value="${i+1}" ${an.month===i+1?'selected':''}>${i+1}月</option>`).join('')}</select>
+      <select class="form-select" id="edit-day-${an.id}" style="flex:1;">${Array.from({length:31},(_,i)=>`<option value="${i+1}" ${an.day===i+1?'selected':''}>${i+1}日</option>`).join('')}</select>
+      <button class="form-btn" id="save-an-${an.id}" style="width:auto;padding:8px 14px;">保存</button>
+      <button class="form-btn" id="cancel-an-${an.id}" style="width:auto;padding:8px 14px;background:var(--bg-card);color:var(--text-sub);">取消</button>
+    </div>
+  </div>`;
+}
+
+function bindAnEvents() {
+  $$('.action-edit[data-edit-id]').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.editId;
+      const item = $(`.an-item[data-an-id="${id}"]`);
+      const form = $(`#edit-form-${id}`);
+      if (item && form) { item.style.display = 'none'; form.style.display = 'block'; }
+    };
+  });
+  $$('.action-remove[data-del-id]').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.delId;
+      state.anniversaries = state.anniversaries.filter(a => a.id !== id);
+      saveState(); toast('已删除'); showAnniversaryModal();
+    };
+  });
+  $$('[id^="save-an-"]').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.id.replace('save-an-', '');
+      const an = state.anniversaries.find(a => a.id === id);
+      if (!an) return;
+      const name = $(`#edit-name-${id}`).value.trim();
+      if (!name) { toast('请输入名称', 'error'); return; }
+      an.emoji = $(`#edit-emoji-${id}`).value.trim() || '🎂';
+      an.name = name;
+      an.month = parseInt($(`#edit-month-${id}`).value);
+      an.day = parseInt($(`#edit-day-${id}`).value);
+      saveState(); toast('已修改！', 'success'); showAnniversaryModal();
+    };
+  });
+  $$('[id^="cancel-an-"]').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.id.replace('cancel-an-', '');
+      const item = $(`.an-item[data-an-id="${id}"]`);
+      const form = $(`#edit-form-${id}`);
+      if (item && form) { item.style.display = 'flex'; form.style.display = 'none'; }
+    };
   });
 }
 
