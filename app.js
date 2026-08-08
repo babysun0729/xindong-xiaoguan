@@ -740,6 +740,7 @@ async function handleBind() {
   if (res.partner) {
     state.couple.name2 = res.partner.nickname;
   }
+  stopBindCheck();
   saveSession();
   toast('绑定成功！开启你们的甜蜜空间~', 'success');
   coinFlyAnim();
@@ -766,6 +767,8 @@ function applyServerState(s) {
 
 function handleLogout() {
   showConfirmModal('🚪', '退出登录？', '退出后需要重新登录才能使用', () => {
+    stopAutoSync();
+    stopBindCheck();
     state.isLoggedIn = false;
     state.isBound = false;
     state.user = null;
@@ -1758,19 +1761,51 @@ function init() {
     $('#splash-screen').classList.add('fade-out');
     setTimeout(async () => {
       $('#splash-screen').style.display = 'none';
-      if (state.isLoggedIn && state.isBound) {
-        // 已登录且已绑定：从服务器同步最新状态
-        await syncFromServer();
-        showMainApp();
-        // 启动定时同步（每30秒拉取一次最新数据）
-        startAutoSync();
-      } else if (state.isLoggedIn && !state.isBound) {
-        showBindingPage();
+      if (state.isLoggedIn) {
+        // 已登录：向服务器检查最新绑定状态（对方可能已经跟你绑定了）
+        const res = await api('state/' + state.userId);
+        if (res.success && res.state) {
+          // 服务器确认已绑定：同步状态并进入主界面
+          state.isBound = true;
+          applyServerState(res.state);
+          saveSession();
+          showMainApp();
+          startAutoSync();
+        } else {
+          // 服务器显示未绑定：显示绑定页面，并开始轮询检查
+          state.isBound = false;
+          saveSession();
+          showBindingPage();
+          startBindCheck();
+        }
       } else {
         showAuthPage();
       }
     }, 600);
   }, 1800);
+}
+
+// 轮询检查绑定状态（在绑定页面等待对方绑定时自动检测）
+let bindCheckInterval = null;
+function startBindCheck() {
+  if (bindCheckInterval) clearInterval(bindCheckInterval);
+  bindCheckInterval = setInterval(async () => {
+    if (!state.isLoggedIn) { stopBindCheck(); return; }
+    const res = await api('state/' + state.userId);
+    if (res.success && res.state) {
+      // 检测到对方已绑定！自动进入主界面
+      stopBindCheck();
+      state.isBound = true;
+      applyServerState(res.state);
+      saveSession();
+      toast('Ta已与你绑定！正在进入...', 'success');
+      setTimeout(() => { showMainApp(); startAutoSync(); }, 1000);
+    }
+  }, 5000); // 每5秒检查一次
+}
+
+function stopBindCheck() {
+  if (bindCheckInterval) { clearInterval(bindCheckInterval); bindCheckInterval = null; }
 }
 
 // 定时从服务器同步（让双方数据保持一致）
