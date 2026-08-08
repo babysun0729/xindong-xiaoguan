@@ -86,7 +86,7 @@ function db() {
 
 async function getNextUserId() {
   const store = db();
-  let counter = parseInt(await store.get('meta:nextUserId') || '0');
+  let counter = parseInt(await store.get('meta:nextUserId', { consistency: 'strong' }) || '0');
   counter++;
   await store.set('meta:nextUserId', String(counter));
   return counter;
@@ -94,25 +94,25 @@ async function getNextUserId() {
 
 async function getUserById(userId) {
   const store = db();
-  const data = await store.get(`user:${userId}`);
+  const data = await store.get(`user:${userId}`, { consistency: 'strong' });
   return data ? JSON.parse(data) : null;
 }
 
 async function getUserByPhone(phone) {
   const store = db();
-  const userId = await store.get(`phone:${phone}`);
+  const userId = await store.get(`phone:${phone}`, { consistency: 'strong' });
   return userId ? await getUserById(userId) : null;
 }
 
 async function getUserByNickname(nickname) {
   const store = db();
-  const userId = await store.get(`nickname:${nickname}`);
+  const userId = await store.get(`nickname:${nickname}`, { consistency: 'strong' });
   return userId ? await getUserById(userId) : null;
 }
 
 async function getUserByInviteCode(code) {
   const store = db();
-  const userId = await store.get(`invite:${code}`);
+  const userId = await store.get(`invite:${code}`, { consistency: 'strong' });
   return userId ? await getUserById(userId) : null;
 }
 
@@ -131,7 +131,7 @@ async function updateUser(user) {
 
 async function getCoupleState(coupleKey) {
   const store = db();
-  const data = await store.get(`couple:${coupleKey}`);
+  const data = await store.get(`couple:${coupleKey}`, { consistency: 'strong' });
   return data ? JSON.parse(data) : null;
 }
 
