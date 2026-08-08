@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>心动小馆 · 情侣虚拟互动点餐系统</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ========== 启动页 ========== -->
+    <div id="splash-screen" class="splash-screen">
+      <div class="splash-heart">
+        <svg viewBox="0 0 100 100" class="heart-svg">
+          <path d="M50 88 C50 88 12 62 12 38 C12 24 22 14 34 14 C42 14 48 18 50 24 C52 18 58 14 66 14 C78 14 88 24 88 38 C88 62 50 88 50 88Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <p class="splash-title">心动小馆</p>
+      <p class="splash-subtitle">情侣虚拟互动点餐系统</p>
+      <div class="splash-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- ========== 登录注册页 ========== -->
+    <div id="auth-page" class="auth-page hidden">
+      <div class="auth-bg-deco"></div>
+      <div class="auth-content">
+        <div class="auth-logo">
+          <div class="auth-logo-icon">🏠</div>
+          <h1 class="auth-title">心动小馆</h1>
+          <p class="auth-subtitle">点一份甜蜜，送给心爱的Ta</p>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-mode="login">登录</button>
+          <button class="auth-tab" data-mode="register">注册</button>
+        </div>
+
+        <!-- 登录表单 -->
+        <div class="auth-form" id="login-form">
+          <div class="form-group">
+            <label class="form-label">手机号 / 账号</label>
+            <input class="form-input" id="login-account" type="text" placeholder="请输入手机号或账号" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label">密码</label>
+            <input class="form-input" id="login-password" type="password" placeholder="请输入密码">
+          </div>
+          <div class="auth-options">
+            <label class="auth-remember">
+              <input type="checkbox" id="remember-me" checked> 记住登录状态
+            </label>
+          </div>
+          <button class="auth-submit-btn" id="login-submit">登 录</button>
+        </div>
+
+        <!-- 注册表单 -->
+        <div class="auth-form hidden" id="register-form">
+          <div class="form-group">
+            <label class="form-label">手机号</label>
+            <input class="form-input" id="reg-phone" type="tel" placeholder="请输入手机号" maxlength="11">
+          </div>
+          <div class="form-group">
+            <label class="form-label">昵称</label>
+            <input class="form-input" id="reg-nickname" type="text" placeholder="给自己起个昵称">
+          </div>
+          <div class="form-group">
+            <label class="form-label">密码</label>
+            <input class="form-input" id="reg-password" type="password" placeholder="设置密码（至少6位）">
+          </div>
+          <div class="form-group">
+            <label class="form-label">确认密码</label>
+            <input class="form-input" id="reg-password2" type="password" placeholder="再次输入密码">
+          </div>
+          <button class="auth-submit-btn" id="register-submit">注 册</button>
+        </div>
+
+        <p class="auth-hint">注册后获得专属邀请码，邀请Ta一起使用</p>
+      </div>
+    </div>
+
+    <!-- ========== 情侣绑定页（单身首页） ========== -->
+    <div id="binding-page" class="binding-page hidden">
+      <div class="binding-bg-deco"></div>
+      <div class="binding-content">
+        <div class="binding-illustration">💑</div>
+        <h2 class="binding-title">绑定你的另一半</h2>
+        <p class="binding-desc">输入对方的邀请码，开启专属情侣空间</p>
+
+        <!-- 我的邀请码 -->
+        <div class="invite-card">
+          <div class="invite-label">我的专属邀请码</div>
+          <div class="invite-code-row">
+            <span class="invite-code" id="my-invite-code">------</span>
+            <button class="invite-copy-btn" id="copy-invite-code">复制</button>
+          </div>
+          <p class="invite-tip">将邀请码发给Ta，Ta输入后即可绑定</p>
+        </div>
+
+        <!-- 输入对方邀请码 -->
+        <div class="bind-input-section">
+          <label class="form-label">输入对方的邀请码</label>
+          <div class="bind-input-row">
+            <input class="form-input bind-code-input" id="partner-code-input" type="text" placeholder="5位邀请码" maxlength="5">
+            <button class="bind-submit-btn" id="bind-submit">绑定</button>
+          </div>
+        </div>
+
+        <div class="binding-rules">
+          <p>· 绑定后双方数据互通，共同累积爱心币</p>
+          <p>· 解除绑定需双方确认，单方无法解绑</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 主容器 ========== -->
+    <div id="main-app" class="main-app hidden">
+
+      <!-- ========== 首页（情侣专属主页） ========== -->
+      <section id="page-home" class="page active">
+        <!-- 大屏轮播图 -->
+        <div class="carousel" id="carousel">
+          <div class="carousel-track" id="carousel-track">
+            <div class="carousel-slide slide-1">
+              <div class="slide-deco slide-deco-1"></div>
+              <div class="slide-deco slide-deco-2"></div>
+              <div class="slide-content">
+                <div class="slide-emoji">💑</div>
+                <h3 class="slide-title">欢迎来到心动小馆</h3>
+                <p class="slide-desc">点一份甜蜜，送给心爱的Ta</p>
+              </div>
+            </div>
+            <div class="carousel-slide slide-2">
+              <div class="slide-deco slide-deco-1"></div>
+              <div class="slide-deco slide-deco-2"></div>
+              <div class="slide-content">
+                <div class="slide-emoji">🍔</div>
+                <h3 class="slide-title">实物外卖馆</h3>
+                <p class="slide-desc">奶茶·快餐·盖饭·小吃，100+真实门店菜品</p>
+              </div>
+            </div>
+            <div class="carousel-slide slide-3">
+              <div class="slide-deco slide-deco-1"></div>
+              <div class="slide-deco slide-deco-2"></div>
+              <div class="slide-content">
+                <div class="slide-emoji">🧸</div>
+                <h3 class="slide-title">情侣互动馆</h3>
+                <p class="slide-desc">95+甜蜜互动任务，让每一天都有仪式感</p>
+              </div>
+            </div>
+            <div class="carousel-slide slide-4">
+              <div class="slide-deco slide-deco-1"></div>
+              <div class="slide-deco slide-deco-2"></div>
+              <div class="slide-content">
+                <div class="slide-emoji">💝</div>
+                <h3 class="slide-title">精选套餐推荐</h3>
+                <p class="slide-desc">实物+互动组合搭配，实惠又甜蜜</p>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-dots" id="carousel-dots"></div>
+        </div>
+
+        <!-- 情侣信息卡 -->
+        <div class="home-header">
+          <div class="header-bg-deco"></div>
+          <div class="couple-card">
+            <div class="couple-avatars">
+              <div class="avatar avatar-1" id="avatar-1">🌸</div>
+              <div class="couple-link">
+                <div class="link-line"></div>
+                <span class="link-heart">♥</span>
+                <div class="link-line"></div>
+              </div>
+              <div class="avatar avatar-2" id="avatar-2">🌙</div>
+            </div>
+            <div class="couple-names">
+              <span id="name-1">小甜心</span>
+              <span class="names-amp">&</span>
+              <span id="name-2">大笨蛋</span>
+            </div>
+            <div class="together-days">
+              <span class="days-num" id="days-together">0</span>
+              <span class="days-label">天</span>
+            </div>
+            <div class="together-label">已经在一起啦</div>
+          </div>
+        </div>
+
+        <!-- 数据概览栏 -->
+        <div class="stats-bar">
+          <div class="stat-pill stat-coin">
+            <div class="coin-icon">
+              <svg viewBox="0 0 40 40" width="28" height="28">
+                <circle cx="20" cy="20" r="18" fill="#FFD666" stroke="#F4A261" stroke-width="2"/>
+                <path d="M20 28 C20 28 10 21 10 15 C10 11 13 8 16 8 C18 8 19 9 20 11 C21 9 22 8 24 8 C27 8 30 11 30 15 C30 21 20 28 20 28Z" fill="#FF6B6B"/>
+              </svg>
+            </div>
+            <div class="stat-pill-info">
+              <span class="stat-pill-num" id="coin-count">100</span>
+              <span class="stat-pill-label">爱心币</span>
+            </div>
+          </div>
+          <div class="stat-pill stat-pending" id="pending-pill">
+            <span class="stat-pill-icon">📋</span>
+            <div class="stat-pill-info">
+              <span class="stat-pill-num" id="home-pending-count">0</span>
+              <span class="stat-pill-label">待完成</span>
+            </div>
+          </div>
+          <button class="checkin-btn" id="checkin-btn">
+            <span class="checkin-icon">📅</span>
+            <span>签到</span>
+          </button>
+        </div>
+
+        <!-- 纪念日倒计时 -->
+        <div class="section-title-row">
+          <h3 class="section-title">纪念日倒计时</h3>
+        </div>
+        <div class="countdown-row" id="countdown-row"></div>
+
+        <!-- 快捷入口 -->
+        <div class="section-title-row">
+          <h3 class="section-title">快捷入口</h3>
+        </div>
+        <div class="quick-grid">
+          <div class="quick-item" data-nav="menu">
+            <div class="quick-icon quick-icon-1">🍽️</div>
+            <span>去点餐</span>
+          </div>
+          <div class="quick-item" data-nav="orders">
+            <div class="quick-icon quick-icon-2">📋</div>
+            <span>订单</span>
+          </div>
+          <div class="quick-item" data-nav="album">
+            <div class="quick-icon quick-icon-3">📷</div>
+            <span>回忆相册</span>
+          </div>
+          <div class="quick-item" data-nav="achievements">
+            <div class="quick-icon quick-icon-4">🏅</div>
+            <span>成就</span>
+          </div>
+        </div>
+
+        <!-- 今日推荐 -->
+        <div class="section-title-row">
+          <h3 class="section-title">今日甜蜜推荐</h3>
+          <span class="section-hint">为你精选</span>
+        </div>
+        <div class="recommend-card" id="recommend-card"></div>
+
+        <div class="home-footer"><p>让每一天都有仪式感 💗</p></div>
+      </section>
+
+      <!-- ========== 菜单页 ========== -->
+      <section id="page-menu" class="page">
+        <div class="page-header">
+          <h2 class="page-title">甜蜜菜单</h2>
+          <p class="page-subtitle">选一份甜蜜，送给心爱的Ta</p>
+        </div>
+        <!-- 顶层模式切换器 -->
+        <div class="mode-tabs" id="mode-tabs">
+          <button class="mode-tab active" data-mode="real"><span>🍔</span><span>实物外卖馆</span></button>
+          <button class="mode-tab" data-mode="virtual"><span>🧸</span><span>情侣互动馆</span></button>
+          <button class="mode-tab" data-mode="combo"><span>💝</span><span>套餐推荐</span></button>
+        </div>
+        <!-- 侧边栏布局 -->
+        <div class="menu-sidebar-layout">
+          <!-- 左侧分类侧边栏 -->
+          <div class="menu-sidebar" id="menu-sidebar"></div>
+          <!-- 右侧内容区 -->
+          <div class="menu-content">
+            <div class="brand-filter hidden" id="brand-filter"></div>
+            <div class="cat-desc" id="cat-desc"></div>
+            <div class="menu-list" id="menu-list"></div>
+          </div>
+        </div>
+        <div class="cart-float hidden" id="cart-float">
+          <div class="cart-float-info">
+            <div class="cart-float-badge" id="cart-badge">0</div>
+            <span class="cart-float-text">购物车</span>
+          </div>
+          <div class="cart-float-coin"><span id="cart-total-coin">0</span><span>币</span></div>
+          <button class="cart-float-btn" id="cart-float-btn">去结算</button>
+        </div>
+      </section>
+
+      <!-- ========== 订单页 ========== -->
+      <section id="page-orders" class="page">
+        <div class="page-header">
+          <h2 class="page-title">订单中心</h2>
+          <p class="page-subtitle">每一单都是你们的甜蜜回忆</p>
+        </div>
+        <div class="order-tabs" id="order-tabs">
+          <button class="order-tab active" data-type="pending">
+            <span>待完成</span>
+            <span class="order-tab-badge hidden" id="pending-badge">0</span>
+          </button>
+          <button class="order-tab" data-type="completed"><span>已完成</span></button>
+          <button class="order-tab" data-type="album"><span>回忆相册</span></button>
+        </div>
+        <div class="order-list" id="order-list"></div>
+      </section>
+
+      <!-- ========== 回忆相册页 ========== -->
+      <section id="page-album" class="page">
+        <div class="page-header">
+          <h2 class="page-title">回忆相册</h2>
+          <p class="page-subtitle">所有互动凭证，永久珍藏</p>
+        </div>
+        <div class="album-search-row">
+          <input class="form-input album-search-input" id="album-search" type="text" placeholder="🔍 搜索菜品名称...">
+        </div>
+        <div class="album-grid" id="album-grid"></div>
+      </section>
+
+      <!-- ========== 成就页 ========== -->
+      <section id="page-achievements" class="page">
+        <div class="page-header">
+          <h2 class="page-title">甜蜜勋章</h2>
+          <p class="page-subtitle">解锁属于你们的恋爱成就</p>
+        </div>
+        <div class="achievement-stats" id="achievement-stats"></div>
+        <div class="achievement-grid" id="achievement-grid"></div>
+      </section>
+
+      <!-- ========== 我的页 ========== -->
+      <section id="page-profile" class="page">
+        <div class="page-header">
+          <h2 class="page-title">我们的小窝</h2>
+          <p class="page-subtitle">管理专属互动空间</p>
+        </div>
+
+        <div class="profile-user-card">
+          <div class="profile-user-avatar" id="profile-avatar">🌸</div>
+          <div class="profile-user-info">
+            <div class="profile-user-name" id="profile-name">小甜心</div>
+            <div class="profile-user-sub">已绑定 · 在一起 <span id="profile-days">0</span> 天</div>
+          </div>
+        </div>
+
+        <div class="profile-card room-card">
+          <div class="profile-card-icon">🏠</div>
+          <div class="profile-card-body">
+            <div class="profile-card-label">情侣房间码</div>
+            <div class="profile-card-value" id="room-code">------</div>
+          </div>
+          <button class="profile-card-btn" id="copy-room-code">复制</button>
+        </div>
+
+        <div class="profile-menu-group">
+          <div class="profile-menu-item" data-modal="wishlist"><span class="pm-icon">🌟</span><span class="pm-text">双人心愿清单</span><span class="pm-arrow">›</span></div>
+          <div class="profile-menu-item" data-modal="blacklist"><span class="pm-icon">🚫</span><span class="pm-text">屏蔽菜品</span><span class="pm-arrow">›</span></div>
+          <div class="profile-menu-item" data-modal="custom"><span class="pm-icon">✏️</span><span class="pm-text">自定义菜品</span><span class="pm-arrow">›</span></div>
+          <div class="profile-menu-item" data-modal="anniversary"><span class="pm-icon">🎂</span><span class="pm-text">纪念日管理</span><span class="pm-arrow">›</span></div>
+        </div>
+
+        <div class="profile-menu-group">
+          <div class="profile-menu-item" data-modal="couple-info"><span class="pm-icon">💑</span><span class="pm-text">情侣信息设置</span><span class="pm-arrow">›</span></div>
+          <div class="profile-menu-item" data-modal="coin-log"><span class="pm-icon">💰</span><span class="pm-text">爱心币收支明细</span><span class="pm-arrow">›</span></div>
+          <div class="profile-menu-item" id="open-unbind"><span class="pm-icon">💔</span><span class="pm-text">解除情侣绑定</span><span class="pm-arrow">›</span></div>
+          <div class="profile-menu-item" id="logout-btn"><span class="pm-icon">🚪</span><span class="pm-text">退出登录</span><span class="pm-arrow">›</span></div>
+        </div>
+
+        <div class="profile-footer"><p>心动小馆 v2.0 · 毕业设计作品</p></div>
+      </section>
+
+      <!-- 底部导航 -->
+      <nav class="tab-bar" id="tab-bar">
+        <button class="tab-item active" data-page="home"><span class="tab-icon">🏠</span><span class="tab-label">首页</span></button>
+        <button class="tab-item" data-page="menu"><span class="tab-icon">🍽️</span><span class="tab-label">菜单</span></button>
+        <button class="tab-item" data-page="orders"><span class="tab-icon">📋</span><span class="tab-label">订单</span></button>
+        <button class="tab-item" data-page="achievements"><span class="tab-icon">🏅</span><span class="tab-label">成就</span></button>
+        <button class="tab-item" data-page="profile"><span class="tab-icon">💕</span><span class="tab-label">我的</span></button>
+      </nav>
+    </div>
+
+    <!-- ========== 购物车弹窗 ========== -->
+    <div class="modal-overlay hidden" id="cart-modal-overlay">
+      <div class="cart-modal" id="cart-modal">
+        <div class="cart-modal-header">
+          <h3>🛒 购物车</h3>
+          <button class="cart-close" id="cart-close">✕</button>
+        </div>
+        <div class="cart-items" id="cart-items"></div>
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span>合计</span>
+            <div class="cart-total-coin"><span id="cart-modal-total">0</span><span>爱心币</span></div>
+          </div>
+          <button class="cart-checkout-btn" id="cart-checkout-btn">下单送给Ta</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 菜品详情弹窗 ========== -->
+    <div class="modal-overlay hidden" id="dish-detail-overlay">
+      <div class="dish-detail-modal" id="dish-detail-modal"></div>
+    </div>
+
+    <!-- ========== 通用弹窗 ========== -->
+    <div class="modal-overlay hidden" id="generic-modal-overlay">
+      <div class="generic-modal" id="generic-modal"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

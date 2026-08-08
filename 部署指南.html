@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>心动小馆 · 部署指南</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, 'Noto Sans SC', sans-serif; background:#FFF8F3; color:#4A2C2A; line-height:1.8; }
+.container { max-width:720px; margin:0 auto; padding:24px 20px 60px; }
+.header { text-align:center; margin-bottom:32px; }
+.header h1 { font-size:28px; color:#E84855; margin-bottom:8px; }
+.header p { color:#8B6F65; font-size:14px; }
+.step { background:#fff; border-radius:16px; padding:24px; margin-bottom:16px; box-shadow:0 2px 12px rgba(228,140,140,0.1); }
+.step-num { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; background:linear-gradient(135deg,#FF6B6B,#E84855); color:#fff; border-radius:50%; font-size:16px; font-weight:700; margin-bottom:12px; }
+.step h2 { font-size:18px; color:#4A2C2A; margin-bottom:10px; }
+.step p { font-size:14px; color:#5A3C3A; margin-bottom:8px; }
+.step .tip { background:#FFF1E8; border-left:3px solid #F4A261; padding:10px 14px; border-radius:8px; font-size:13px; color:#8B6F65; margin-top:10px; }
+.step .code { background:#2D2D2D; color:#f8f8f2; padding:12px 16px; border-radius:8px; font-family:'Courier New', monospace; font-size:13px; margin:10px 0; overflow-x:auto; }
+.step .link { color:#FF6B6B; text-decoration:none; font-weight:600; }
+.step .link:hover { text-decoration:underline; }
+.step ol { padding-left:20px; margin:8px 0; }
+.step ol li { font-size:14px; margin-bottom:6px; }
+.step ul { padding-left:20px; margin:8px 0; }
+.step ul li { font-size:14px; margin-bottom:4px; }
+.badge { display:inline-block; background:#FFD666; color:#4A2C2A; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:600; margin-left:6px; }
+.section-title { font-size:20px; color:#E84855; margin:28px 0 16px; padding-left:12px; border-left:4px solid #FF6B6B; }
+.final { background:linear-gradient(135deg,#FF6B6B,#E84855); color:#fff; text-align:center; padding:32px; border-radius:16px; margin-top:24px; }
+.final h2 { font-size:22px; margin-bottom:8px; }
+.final p { font-size:14px; opacity:0.9; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>心动小馆 · 永久部署指南</h1>
+    <p>按以下步骤操作，部署后获得24小时在线的固定网址</p>
+  </div>
+
+  <div class="section-title">方法一：Render 部署（推荐）</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <h2>注册 GitHub 账号</h2>
+    <p>打开 <a href="https://github.com/signup" target="_blank" class="link">github.com/signup</a>，用邮箱注册一个免费账号（如果已有账号跳过此步）。</p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <h2>创建新仓库</h2>
+    <ol>
+      <li>登录后点右上角 <strong>+</strong> → <strong>New repository</strong></li>
+      <li>仓库名填：<strong>xindong-xiaoguan</strong></li>
+      <li>选择 <strong>Public</strong>（公开）</li>
+      <li>勾选 <strong>Add a README file</strong></li>
+      <li>点 <strong>Create repository</strong></li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <h2>上传项目文件</h2>
+    <ol>
+      <li>在仓库页面点 <strong>Add file</strong> → <strong>Upload files</strong></li>
+      <li>把以下 5 个文件拖进去：<span class="badge">index.html</span> <span class="badge">styles.css</span> <span class="badge">app.js</span> <span class="badge">server.py</span> <span class="badge">requirements.txt</span></li>
+      <li>文件都在你的 <strong>新建文件夹 (2)</strong> 里面</li>
+      <li>点 <strong>Commit changes</strong> 提交</li>
+    </ol>
+    <div class="tip">注意：不要上传 xindong.db 文件，那是本地数据库</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <h2>注册 Render 账号</h2>
+    <p>打开 <a href="https://render.com/register" target="_blank" class="link">render.com/register</a>，点 <strong>Sign up with GitHub</strong> 用刚才的GitHub账号注册。</p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <h2>创建数据库</h2>
+    <ol>
+      <li>进入 Render 控制台，点 <strong>New +</strong> → <strong>PostgreSQL</strong></li>
+      <li>Name 填：<strong>xindong-db</strong></li>
+      <li>其他默认，点 <strong>Create database</strong></li>
+      <li>创建完成后，找到 <strong>Connections</strong> 里的 <strong>Internal Database URL</strong>，复制它</li>
+    </ol>
+    <div class="tip">这个 URL 就是 DATABASE_URL，待会要用</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <h2>创建 Web 服务</h2>
+    <ol>
+      <li>回到控制台，点 <strong>New +</strong> → <strong>Web Service</strong></li>
+      <li>选择刚才创建的 <strong>xindong-xiaoguan</strong> 仓库</li>
+      <li>填写配置：
+        <ul>
+          <li><strong>Name</strong>：xindong-xiaoguan</li>
+          <li><strong>Runtime</strong>：Python 3</li>
+          <li><strong>Build Command</strong>：<code style="background:#f5f5f5;padding:2px 6px;border-radius:4px;font-size:12px">pip install -r requirements.txt</code></li>
+          <li><strong>Start Command</strong>：<code style="background:#f5f5f5;padding:2px 6px;border-radius:4px;font-size:12px">gunicorn server:app</code></li>
+        </ul>
+      </li>
+      <li>展开 <strong>Environment</strong>，添加环境变量：
+        <ul>
+          <li>Key 填 <strong>DATABASE_URL</strong>，Value 粘贴刚才复制的数据库URL</li>
+        </ul>
+      </li>
+      <li>点 <strong>Create Web Service</strong> 开始部署</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <h2>等待部署完成</h2>
+    <p>Render会自动安装依赖并启动服务，大约2-3分钟。看到状态变为 <strong>Live</strong> 就成功了！</p>
+    <p>你的永久网址是：<strong>https://xindong-xiaoguan.onrender.com</strong></p>
+    <div class="tip">免费版闲置15分钟后会休眠，首次访问需要等30秒唤醒。之后就可以一直用了。</div>
+  </div>
+
+  <div class="section-title">方法二：PythonAnywhere（备选）</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <h2>注册账号并上传文件</h2>
+    <ol>
+      <li>打开 <a href="https://www.pythonanywhere.com/registration/register/beginner/" target="_blank" class="link">pythonanywhere.com</a> 注册免费账号</li>
+      <li>进入 <strong>Files</strong> 页面，上传 5 个文件（同上）</li>
+      <li>进入 <strong>Web</strong> 页面，点 <strong>Add a new web app</strong></li>
+      <li>选择 <strong>Flask</strong> 框架，Python 版本选 3.10</li>
+      <li>路径填 <strong>server.py</strong></li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <h2>安装依赖</h2>
+    <p>进入 <strong>Consoles</strong> 页面，打开 Bash 控制台，运行：</p>
+    <div class="code">pip install flask werkzeug gunicorn</div>
+    <p>你的网址是：<strong>你的用户名.pythonanywhere.com</strong></p>
+    <div class="tip">PythonAnywhere 免费版不需要外部数据库，直接用SQLite，但限制较多</div>
+  </div>
+
+  <div class="final">
+    <h2>部署完成后</h2>
+    <p>把你的永久网址发给朋友，他们随时打开就能注册使用<br>不需要你开电脑，24小时在线</p>
+  </div>
+</div>
+</body>
+</html>
