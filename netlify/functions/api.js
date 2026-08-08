@@ -2,7 +2,6 @@
  * 心动小馆 · Netlify Functions API
  * 使用 Netlify Blobs 作为数据库，国内可访问
  */
-import { getStore } from '@netlify/blobs';
 
 const CHARS_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const CHARS_DIGITS = '0123456789';
@@ -79,8 +78,14 @@ function json(data, status = 200) {
 
 // ========== 数据库操作（Netlify Blobs）==========
 
+let _store = null;
+
+function setContext(context) {
+  _store = context.netlify.blobs.getStore('xindong');
+}
+
 function db() {
-  return getStore('xindong');
+  return _store;
 }
 
 async function getNextUserId() {
@@ -330,6 +335,8 @@ export default async (request, context) => {
   const url = new URL(request.url);
   const path = url.pathname;
   const method = request.method;
+
+  setContext(context);
 
   if (method === 'OPTIONS') {
     return new Response(null, {
